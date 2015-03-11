@@ -1,0 +1,8 @@
+{{#if links}}
+	<ul>
+		<h2 class="search-title truncate">{{t titleKey}}</h2>
+		{{#each links}}
+			<li class="truncate"><a href="{{{url}}}">{{{wording}}}</a></li>
+		{{/each}}
+	</ul>
+{{/if}}
