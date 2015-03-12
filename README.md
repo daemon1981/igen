@@ -25,9 +25,10 @@ var iGen = new IGen({
   },
   translations: {
     file:           "./traductions.csv",  // location of the translation "CSV" file (String)
-    indexHeader:    0,                    // index of the header        (Number, default 0)
-    indexStartBody: 1,                    // starting index of the body (Number, default 1)
-    keyColumn:      "dev",                //                            (Number|String, default 0)
+    indexHeader:    0,                    // index of the header                    (Number, default 0)
+    indexStartBody: 1,                    // starting index of the body             (Number, default 1)
+    keyColumn:      "dev",                // column of the translation keys         (Number|String, default 0)
+    refLanguage:    "fr",                 // column of the ref translation language (Number|String, default 0)
     languages: {
       fr: {
         column:   "fr" // (String|Number, required)
@@ -47,10 +48,6 @@ var iGen = new IGen({
 });
 
 iGen.run(function(err, result){
-  if (err) return console.log(err);
-});
-
-iGen.run("fr", function(err, result){
   if (err) return console.log(err);
 });
 ```

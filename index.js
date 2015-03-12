@@ -48,17 +48,11 @@ IGen.prototype._runLang = function (language, callback) {
 /**
  * Generate language files
  */
-IGen.prototype.run = function (langName, callback) {
+IGen.prototype.run = function (callback) {
   var self = this;
 
-  var languages = [langName];
-  if (typeof langName === 'function') {
-    languages = this.translations.getLanguages();
-    callback = langName;
-  }
-
   async.eachSeries(
-    languages,
+    this.translations.getLanguages(),
     function(language, next){
       if (!self.translations.getLangFilename(language)) {
         return next();

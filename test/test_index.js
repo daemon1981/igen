@@ -71,13 +71,6 @@ describe('Index', function(){
           done();
         });
       });
-      it('should not call _runLang when trying to run with a language', function(done){
-        igen.run('fr', function(err){
-          if (err) return done(err);
-          assert.equal(stubs.igen._runLang.callCount, 0);
-          done();
-        });
-      });
     });
     describe('languages set', function(){
       beforeEach(function(){
@@ -103,14 +96,6 @@ describe('Index', function(){
           assert.equal(stubs.igen._runLang.callCount, 2);
           assert(stubs.igen._runLang.calledWith('fr'), 'should call with fr');
           assert(stubs.igen._runLang.calledWith('en'), 'should call with en');
-          done();
-        });
-      });
-      it('should call _runLang for the specified language if found', function(done){
-        igen.run('fr', function(err){
-          if (err) return done(err);
-          assert.equal(stubs.igen._runLang.callCount, 1);
-          assert(stubs.igen._runLang.calledWith('fr'), 'should call with fr');
           done();
         });
       });
