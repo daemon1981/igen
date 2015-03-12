@@ -86,6 +86,7 @@
     "globals"       : {
         "require":    false,
         "exports":    true,
+        "process":    false,
         "module":     false,
         "__dirname":     false
     }        // additional predefined global variables
