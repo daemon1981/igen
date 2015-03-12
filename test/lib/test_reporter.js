@@ -22,58 +22,69 @@ describe('Reporter', function(){
     it('return missing keys', function(){
       var model = new Reporter();
       var keys = ['dummy_key_1', 'dummy_key_2'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1'
-      };
+      var translationsKeys = [ 'dummy_key_1' ];
       var expecpedMissing = ['dummy_key_2'];
 
-      var missing = model.getMissing(keys, translations);
+      var missing = model.getMissing(keys, translationsKeys);
       assert.deepEqual(missing, expecpedMissing);
     });
     it('doesnt affect keys', function(){
       var model = new Reporter();
       var keys = ['dummy_key_1', 'dummy_key_2'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1'
-      };
-      model.getMissing(keys, translations);
+      var translationsKeys = [ 'dummy_key_1' ];
+      model.getMissing(keys, translationsKeys);
       assert.deepEqual(keys, ['dummy_key_1', 'dummy_key_2']);
     });
   });
-  describe('getNotUsed', function(){
-    it('return not used translations keys', function(){
+  describe('getUsed', function(){
+    it('return not used translationsKeys keys', function(){
       var model = new Reporter();
       var keys = ['dummy_key_1'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1',
-        'dummy_key_2': 'dummy label 2'
-      };
+      var translationsKeys = ['dummy_key_1', 'dummy_key_2' ];
+      var expecpedNotUsed = ['dummy_key_1'];
+
+      var missing = model.getUsed(keys, translationsKeys);
+      assert.deepEqual(missing, expecpedNotUsed);
+    });
+  });
+  describe('getNotUsed', function(){
+    it('return not used translationsKeys keys', function(){
+      var model = new Reporter();
+      var keys = ['dummy_key_1'];
+      var translationsKeys = ['dummy_key_1', 'dummy_key_2' ];
       var expecpedNotUsed = ['dummy_key_2'];
 
-      var missing = model.getNotUsed(keys, translations);
+      var missing = model.getNotUsed(keys, translationsKeys);
       assert.deepEqual(missing, expecpedNotUsed);
     });
   });
   describe('getTranslationsKeys', function(){
-    it('return transl ', function(){
+    it('...', function(){
       var model = new Reporter();
-      var keys = ['dummy_key_1', 'dummy_key_2'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1'
+      var allTranslations = {
+        fr: {
+          'dummy_key': 'dummy value'
+        },
+        en: {
+          'dummy_key': 'dummy value'
+        }
       };
-      var expecpedValues = {
-        'dummy_key_1': 'dummy label 1'
-      };
+      var expectedResult = ['dummy_key'];
 
-      var missing = model.getTranslationsKeys(keys, translations);
-      assert.deepEqual(missing, expecpedValues);
+      var result = model.getTranslationsKeys(allTranslations);
+      assert.deepEqual(result, expectedResult);
     });
   });
   describe('run', function(){
     var reporter, stubs;
     var keys = ['dummy_key_1', 'dummy_key_2'];
-    var translations = {
-      'dummy_key_1': 'dummy label 1'
+    var allTranslations = {
+      fr: {
+        'dummy_key_1': 'dummy label 1'
+      },
+      en: {
+        'dummy_key_1': 'dummy label 1'
+      }
     };
     beforeEach(function(){
       reporter = new Reporter();
@@ -88,15 +99,52 @@ describe('Reporter', function(){
       testUtil.restoreStubs(stubs);
     });
     it('should call saveReporting with the right params', function(done){
-      var reporting = { missing: [ 'dummy_key_2' ], notUsed: [], badFormatUsed: [] };
-      reporter.run(keys, translations, function(err){
+      reporter.run(keys, allTranslations, function(err){
         if (err) return done(err);
-        assert(
-          stubs.reporter.saveReporting.calledWith(reporting),
-          'saveReporting should be call with the right parameters'
-        );
+        assert.equal(stubs.reporter.saveReporting.callCount, 1);
         done();
       });
     });
+  });
+  describe('getEmpty', function(){
+    it('return keys of empty translations', function(){
+      var model = new Reporter();
+      var translations = {
+        'dummy_key_1': 'dummy label 1',
+        'empty': '',
+        'whitespace': '\t  ',
+        'dummy_key_2': 'dummy label 2'
+      };
+      var expecpedResult = ['empty', 'whitespace'];
+
+      var result = model.getEmpty(translations);
+      assert.deepEqual(result, expecpedResult);
+    });
+  });
+  describe('getBadFormat', function(){
+    it('return missing keys', function(){
+      var model = new Reporter();
+      var translations = {
+        'dummy_key_1': 'dummy label 1',
+        'empty': '',
+        'whitespace': '\t  ',
+        'dummy_key_2': 'dummy label 2'
+      };
+      var expecpedResult = ['empty', 'whitespace'];
+
+      var result = model.getEmpty(translations);
+      assert.deepEqual(result, expecpedResult);
+    });
+  });
+  describe('isRightFormat', function(){
+    function testIsRightFormat(value, expecpedResult) {
+      var model = new Reporter();
+      var result = model.isRightFormat(value);
+      assert.deepEqual(result, expecpedResult);
+    }
+    it('missing curly braces');
+    // it('missing curly braces', function(){
+    //   testIsRightFormat('dummy phrase {missingCurlyBraces}}', false);
+    // });
   });
 });

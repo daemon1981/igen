@@ -22,7 +22,7 @@ function IGen (options) {
   this.reporter = new Reporter(options.reporter.options);
 }
 
-IGen.prototype._runLang = function (language, keys, callback) {
+IGen.prototype._runLang = function (language, callback) {
   var self = this;
 
   var filename = self.translations.getLangFilename(language);
@@ -37,34 +37,30 @@ IGen.prototype._runLang = function (language, keys, callback) {
   }, function(err, results){
     if (err) return callback(err);
 
-    self._processLangResults(filename, keys, results.translations, callback);
-  });
-};
-
-IGen.prototype._processLangResults = function (filename, keys, translations, callback) {
-  var self = this;
-
-  async.series({
-    generator: function(next) {
-      self.generator.run(filename, translations, next);
-    },
-    reporter: function(next) {
-      self.reporter.run(keys, translations, next);
-    }
-  }, function(err){
-    callback(err);
+    self.generator.run(filename, results.translations, function(err){
+      if (err) return callback(err);
+      callback(null, results.translations);
+    });
   });
 };
 
 IGen.prototype._run = function (keys, callback) {
   var self = this;
+  var allTranslations = {};
 
   async.eachSeries(
     this.translations.getLanguages(),
     function(language, next){
-      self._runLang(language, keys, next);
+      self._runLang(language, function(err, translations){
+        if (err) return next(err);
+        allTranslations[language] = translations;
+        next();
+      });
     },
-    callback
+    function(err){
+      if (err) return callback(err);
+      callback(null, allTranslations);
+    }
   );
 };
 
@@ -74,15 +70,20 @@ IGen.prototype._run = function (keys, callback) {
 IGen.prototype.run = function (callback) {
   var self = this;
 
-  async.series({
-    keys: function(next) {
+  async.waterfall([
+    function keys(next) {
       self.keys.run(next);
+    },
+    function runLangs(keys, next) {
+      self._run(keys, function(err, allTranslations){
+        if (err) return next(err);
+        next(null, keys, allTranslations);
+      });
+    },
+    function reporting(keys, allTranslations, next) {
+      self.reporter.run(keys, allTranslations, next);
     }
-  }, function(err, results) {
-    if (err) return callback(err);
-
-    self._run(results.keys, callback);
-  });
+  ], callback);
 };
 
 module.exports = exports = IGen;
