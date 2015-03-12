@@ -36,7 +36,8 @@ describe('Translations', function(){
         file: "dummy-file.csv",
         indexHeader: 0,
         indexStartBody: 1,
-        keyColumn: 0
+        keyColumn: 0,
+        refLanguage: 1
       });
     });
   });

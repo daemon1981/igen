@@ -2,7 +2,7 @@ var _            = require("lodash");
 var async        = require("async");
 var Templates    = require("./lib/templates");
 var Translations = require("./lib/translations");
-var Generator     = require("./lib/generator");
+var Generator    = require("./lib/generator");
 
 function IGen (options) {
   if (!options) {
@@ -20,14 +20,11 @@ function IGen (options) {
   this.generator = new Generator(options.generator);
 }
 
-IGen.prototype._runLang = function (language, callback) {
+IGen.prototype._runLang = function (language, keys, callback) {
   var self = this;
   async.series({
     translations: function(next) {
       self.translations.extractLang(language, next);
-    },
-    keys: function(next) {
-      self.templates.parseKeys(next);
     }
   }, function(err, results){
     if (err) return callback(err);
@@ -37,18 +34,13 @@ IGen.prototype._runLang = function (language, callback) {
       return callback('Filename is not defined for language: "' + language + '"');
     }
 
-    var keys = results.keys;
     var translations = results.translations;
 
     self.generator.run(filename, keys, translations, callback);
   });
 };
 
-
-/**
- * Generate language files
- */
-IGen.prototype.run = function (callback) {
+IGen.prototype._run = function (keys, callback) {
   var self = this;
 
   async.eachSeries(
@@ -57,10 +49,27 @@ IGen.prototype.run = function (callback) {
       if (!self.translations.getLangFilename(language)) {
         return next();
       }
-      self._runLang(language, next);
+      self._runLang(language, keys, next);
     },
     callback
   );
+};
+
+/**
+ * Generate language files
+ */
+IGen.prototype.run = function (callback) {
+  var self = this;
+
+  async.series({
+    keys: function(next) {
+      self.templates.parseKeys(next);
+    }
+  }, function(err, results) {
+    if (err) return callback(err);
+
+    self._run(results.keys, callback);
+  });
 };
 
 module.exports = exports = IGen;

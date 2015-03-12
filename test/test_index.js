@@ -50,6 +50,34 @@ describe('Index', function(){
     });
   });
   describe('run', function(){
+    var igen, stubs, keys;
+    afterEach(function(){
+      testUtil.restoreStubs(stubs);
+    });
+    describe('no languages set', function(){
+      beforeEach(function(){
+        igen = createIGen();
+        stubs = {
+          igen:      { object: igen, methodNames: [ '_run' ] },
+          templates: { object: igen.templates, methodNames: [ 'parseKeys' ] }
+        };
+        testUtil.createStubs(stubs);
+
+        stubs.igen._run.callsArgWith(1, null);
+        keys = ['key-found'];
+        stubs.templates.parseKeys.callsArgWith(0, null, keys);
+      });
+      it('should not call _run', function(done){
+        igen.run(function(err){
+          if (err) return done(err);
+          assert.equal(stubs.igen._run.callCount, 1);
+          assert.equal(stubs.templates.parseKeys.callCount, 1);
+          done();
+        });
+      });
+    });
+  });
+  describe('_run', function(){
     var igen, stubs;
     afterEach(function(){
       testUtil.restoreStubs(stubs);
@@ -62,10 +90,10 @@ describe('Index', function(){
         };
         testUtil.createStubs(stubs);
 
-        stubs.igen._runLang.callsArgWith(1, null);
+        stubs.igen._runLang.callsArgWith(2, null);
       });
       it('should not call _runLang when running all', function(done){
-        igen.run(function(err){
+        igen._run([], function(err){
           if (err) return done(err);
           assert.equal(stubs.igen._runLang.callCount, 0);
           done();
@@ -88,10 +116,10 @@ describe('Index', function(){
         };
         testUtil.createStubs(stubs);
 
-        stubs.igen._runLang.callsArgWith(1, null);
+        stubs.igen._runLang.callsArgWith(2, null);
       });
       it('should call _runLang for each languages when running all', function(done){
-        igen.run(function(err){
+        igen._run([], function(err){
           if (err) return done(err);
           assert.equal(stubs.igen._runLang.callCount, 2);
           assert(stubs.igen._runLang.calledWith('fr'), 'should call with fr');
@@ -102,7 +130,7 @@ describe('Index', function(){
     });
   });
   describe('_runLang', function(){
-    var igen, stubs, translations, keys;
+    var igen, stubs, translations;
     beforeEach(function(){
       igen = createIGen({
         translations: {
@@ -114,15 +142,12 @@ describe('Index', function(){
       });
       stubs = {
         translations: { object: igen.translations, methodNames: [ 'extractLang' ] },
-        templates:    { object: igen.templates,    methodNames: [ 'parseKeys' ] },
         generator:    { object: igen.generator,    methodNames: [ 'run' ] },
       };
       testUtil.createStubs(stubs);
 
       translations = { key_trans: 'value_trans' };
-      keys = ['key-found'];
       stubs.translations.extractLang.callsArgWith(1, null, translations);
-      stubs.templates.parseKeys.callsArgWith(0, null, keys);
       stubs.generator.run.callsArgWith(3, null);
     });
     afterEach(function(){
@@ -130,11 +155,10 @@ describe('Index', function(){
     });
     it('call translations.extractLang, templates.parseKeys, generator.run' +
       'with the right parameters', function(done){
-      igen._runLang('fr', function(err){
+      igen._runLang('fr', [], function(err){
         if (err) return done(err);
         assert(stubs.translations.extractLang.calledWith('fr'), 'should call extractLang with fr');
-        assert.equal(stubs.templates.parseKeys.callCount, 1);
-        assert(stubs.generator.run.calledWith('dummy-name-fr', keys, translations), 'should call generator.run with righs params');
+        assert(stubs.generator.run.calledWith('dummy-name-fr', [], translations), 'should call generator.run with righs params');
         done();
       });
     });
