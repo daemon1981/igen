@@ -16,7 +16,7 @@ describe('Generators::module', function(){
     it('save json on with module format', function(done){
       var dummyJSON = {
         dummy_key1: 'dummy_value1',
-        dummy_key2: 'dummy_value2'
+        dummy_key2: '\" dummy_value2'
       };
       new ModuleGenerator().run(file, dummyJSON, function(err){
         if (err) return done(err);

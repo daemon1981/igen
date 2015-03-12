@@ -39,7 +39,7 @@ IGen.prototype._runLang = function (language, callback) {
 
     var keys = results.keys;
     var translations = results.translations;
-    console.log('self.generator.run');
+
     self.generator.run(filename, keys, translations, callback);
   });
 };

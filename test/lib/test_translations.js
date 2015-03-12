@@ -93,7 +93,7 @@ describe('Translations', function(){
     });
   });
   describe('parseCsvLine', function(){
-    it('return data with key and vakue', function(){
+    it('return data with key and value', function(){
       var model = createDummyModel();
       var data = model.parseCsvLine('dummy_key;Dummy Label 1;Dummy Label 2', 0, 2);
       var expectedData = {
@@ -108,6 +108,15 @@ describe('Translations', function(){
       var expectedData = {
         key: 'dummy_key',
         value: 'Dummy Label 2'
+      };
+      assert.deepEqual(data, expectedData);
+    });
+    it('escape double quotes " character', function(){
+      var model = createDummyModel();
+      var data = model.parseCsvLine('dummy_key;" Dummy Label 1', 0, 1);
+      var expectedData = {
+        key: 'dummy_key',
+        value: '\" Dummy Label 1'
       };
       assert.deepEqual(data, expectedData);
     });
@@ -127,6 +136,23 @@ describe('Translations', function(){
       var model = createDummyModel();
       var index = model.getFieldColumnIndex('dummy_key;dummy column 1;dummy column 2', 1);
       assert.deepEqual(index, 1);
+    });
+  });
+  describe('sortByKey', function(){
+    it('sort element by key', function(){
+      var model = createDummyModel();
+      var data = {
+        'bcds': 'a value b',
+        'cab': 'b value c',
+        'aagdfs': 'c value a'
+      };
+      var expectedResult = {
+        'aagdfs': 'c value a',
+        'bcds': 'a value b',
+        'cab': 'b value c'
+      };
+      var result = model.sortByKey(data);
+      assert.deepEqual(result, expectedResult);
     });
   });
 });
