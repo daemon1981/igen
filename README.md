@@ -8,8 +8,8 @@ Set your templates location and type
 Requirements
 ------------
 
-Linux OS with `grep -p` working
-Node.js (version >= 0.10)
+- Linux OS with `grep -p` working
+- Node.js (version >= 0.10)
 
 Getting Started
 ---------------
