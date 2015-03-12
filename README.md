@@ -18,32 +18,45 @@ Getting Started
 var IGen = require('igen');
 
 var iGen = new IGen({
-  templates: {
-    path:       "./path/to/templates", // templates directory   (String, required)
-    type:       "handlebars",          // type of the templates (String, required)
-    helperName: "t"                    // name of the helper    (String, required)
+  keys: {
+    module: 'handlebars',
+    options: {
+      path:           "./path/to/templates", // templates directory     (String, required)
+      helperName:     "t"                    // name of the helper      (String, required)
+      undectableKeys: []                     // list of undectable keys (String, required)
+    }
   },
   translations: {
-    file:           "./file.csv",  // location of the translation "CSV" file (String)
-    indexHeader:    0,             // index of the header                    (Number, default 0)
-    indexStartBody: 1,             // starting index of the body             (Number, default 1)
-    keyColumn:      "dev",         // column of the translation keys         (Number|String, default 0)
-    refLanguage:    "fr",          // column of the ref translation language (Number|String, default 0)
-    languages: {
-      fr: {
-        column:   "fr" // (String|Number, required)
-        filename: "fr" // (String, required)
-      },
-      en: {
-        column:   "en"
-        filename: "en"
+    module: 'csv',
+    options: {
+      file:           "./file.csv",  // location of the translation "CSV" file (String)
+      indexHeader:    0,             // index of the header                    (Number, default 0)
+      indexStartBody: 1,             // starting index of the body             (Number, default 1)
+      keyColumn:      "dev",         // column of the translation keys         (Number|String, default 0)
+      refLanguage:    "fr",          // column of the ref translation language (Number|String, default 0)
+      languages: {
+        fr: {
+          column:   "fr" // (String|Number, required)
+          filename: "fr" // (String, required)
+        },
+        en: {
+          column:   "en"
+          filename: "en"
+        }
       }
     }
   },
   generator: {
-    wd: "./locales",   // location of the generated files (String)
-    type: "module",    // type of the generated files     (String)
-    undetectedKeys: [] // undetected keys exception       ([String])
+    module: 'node-export',
+    options: {
+      wd: "./locales"   // location of the generated files (String)
+    }
+  },
+  reporter: {
+    module: 'json',
+    options: {
+      file: "./locales/reporting"   // location of the generated files (String)
+    }
   }
 });
 

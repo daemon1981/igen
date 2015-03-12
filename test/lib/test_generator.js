@@ -1,9 +1,10 @@
 var assert   = require('assert');
+var fs     = require('fs');
 
 var Generator = require('../../lib/generator');
 var testUtil = require('../util');
 
-describe('Analyser', function(){
+describe('Generator', function(){
   describe('constructor', function(){
     it('set default values if not set', function(){
       var model = new Generator();
@@ -20,94 +21,56 @@ describe('Analyser', function(){
       });
     });
   });
-  describe('getMissing', function(){
-    it('return missing keys', function(){
-      var model = new Generator();
-      var keys = ['dummy_key_1', 'dummy_key_2'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1'
-      };
-      var expecpedMissing = ['dummy_key_2'];
-
-      var missing = model.getMissing(keys, translations);
-      assert.deepEqual(missing, expecpedMissing);
-    });
-    it('doesnt affect keys', function(){
-      var model = new Generator();
-      var keys = ['dummy_key_1', 'dummy_key_2'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1'
-      };
-      model.getMissing(keys, translations);
-      assert.deepEqual(keys, ['dummy_key_1', 'dummy_key_2']);
-    });
-  });
-  describe('getNotUsed', function(){
-    it('return not used translations keys', function(){
-      var model = new Generator();
-      var keys = ['dummy_key_1'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1',
-        'dummy_key_2': 'dummy label 2'
-      };
-      var expecpedNotUsed = ['dummy_key_2'];
-
-      var missing = model.getNotUsed(keys, translations);
-      assert.deepEqual(missing, expecpedNotUsed);
-    });
-  });
-  describe('getTranslationsKeys', function(){
-    it('return transl ', function(){
-      var model = new Generator();
-      var keys = ['dummy_key_1', 'dummy_key_2'];
-      var translations = {
-        'dummy_key_1': 'dummy label 1'
-      };
-      var expecpedValues = {
-        'dummy_key_1': 'dummy label 1'
-      };
-
-      var missing = model.getTranslationsKeys(keys, translations);
-      assert.deepEqual(missing, expecpedValues);
-    });
-  });
   describe('run', function(){
     var generator, stubs;
-    var keys = ['dummy_key_1', 'dummy_key_2'];
     var translations = {
       'dummy_key_1': 'dummy label 1'
     };
     beforeEach(function(){
       generator = new Generator();
       stubs = {
-        generator: { object: generator, methodNames: [ 'saveReporting', 'saveTranslationsKeys' ] }
+        generator: { object: generator, methodNames: [ 'saveTranslations' ] }
       };
       testUtil.createStubs(stubs);
 
-      stubs.generator.saveReporting.callsArgWith(2, null);
-      stubs.generator.saveTranslationsKeys.callsArgWith(2, null);
+      stubs.generator.saveTranslations.callsArgWith(2, null);
     });
     afterEach(function(){
       testUtil.restoreStubs(stubs);
     });
-    it('should call saveReporting and saveTranslationsKeys with the right params', function(done){
-      var reportingParam = {
-        missing: [ 'dummy_key_2' ],
-        notUsed: [],
-        badFormatUsed: []
-      };
+    it('should call saveTranslations with the right params', function(done){
       var keysTranslationsParam = { dummy_key_1: 'dummy label 1' };
-      generator.run('dummy-file-name', keys, translations, function(err){
+      generator.run('dummy-file-name', translations, function(err){
         if (err) return done(err);
         assert(
-          stubs.generator.saveReporting.calledWith('dummy-file-name', reportingParam),
-          'saveReporting and saveTranslationsKeys should be call with the right parameters'
-        );
-        assert(
-          stubs.generator.saveTranslationsKeys.calledWith('dummy-file-name', keysTranslationsParam),
-          'saveTranslationsKeys should be call with the right parameters'
+          stubs.generator.saveTranslations.calledWith('.//dummy-file-name.js', keysTranslationsParam),
+          'saveTranslations should be call with the right parameters'
         );
         done();
+      });
+    });
+  });
+  describe('saveTranslations', function(){
+    var file = __dirname + '/result.js';
+    beforeEach(function(done){
+      testUtil.deleteFiles(file, done);
+    });
+    afterEach(function(done){
+      testUtil.deleteFiles(file, done);
+    });
+    it('save json on with module format', function(done){
+      var dummyJSON = {
+        dummy_key1: 'dummy_value1',
+        dummy_key2: '\" dummy_value2'
+      };
+      new Generator().saveTranslations(file, dummyJSON, function(err){
+        if (err) return done(err);
+        fs.exists(file, function (exists) {
+          assert(exists, 'file has not been generated');
+          var fileModule = require(file);
+          assert.deepEqual(fileModule, dummyJSON);
+          done();
+        });
       });
     });
   });

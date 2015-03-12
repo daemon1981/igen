@@ -1,27 +1,35 @@
 var _            = require("lodash");
 var async        = require("async");
-var Templates    = require("./lib/templates");
+var Keys         = require("./lib/keys");
 var Translations = require("./lib/translations");
 var Generator    = require("./lib/generator");
+var Reporter     = require("./lib/reporter");
 
 function IGen (options) {
   if (!options) {
     options = {};
   }
-  var requiredFields = ['templates', 'translations', 'generator'];
+  var requiredFields = ['keys', 'translations', 'generator', 'reporter'];
   _.each(requiredFields, function(field){
     if (!options[field]) {
       throw new Error('Field "' + field + '" is required');
     }
   });
 
-  this.translations = new Translations(options.translations);
-  this.templates = new Templates(options.templates);
-  this.generator = new Generator(options.generator);
+  this.translations = new Translations(options.translations.options);
+  this.keys = new Keys(options.keys.options);
+  this.generator = new Generator(options.generator.options);
+  this.reporter = new Reporter(options.reporter.options);
 }
 
 IGen.prototype._runLang = function (language, keys, callback) {
   var self = this;
+
+  var filename = self.translations.getLangFilename(language);
+  if (!filename) {
+    return callback('Filename is not defined for language: "' + language + '"');
+  }
+
   async.series({
     translations: function(next) {
       self.translations.extractLang(language, next);
@@ -29,14 +37,22 @@ IGen.prototype._runLang = function (language, keys, callback) {
   }, function(err, results){
     if (err) return callback(err);
 
-    var filename = self.translations.getLangFilename(language);
-    if (!filename) {
-      return callback('Filename is not defined for language: "' + language + '"');
+    self._processLangResults(filename, keys, results.translations, callback);
+  });
+};
+
+IGen.prototype._processLangResults = function (filename, keys, translations, callback) {
+  var self = this;
+
+  async.series({
+    generator: function(next) {
+      self.generator.run(filename, translations, next);
+    },
+    reporter: function(next) {
+      self.reporter.run(keys, translations, next);
     }
-
-    var translations = results.translations;
-
-    self.generator.run(filename, keys, translations, callback);
+  }, function(err){
+    callback(err);
   });
 };
 
@@ -46,9 +62,6 @@ IGen.prototype._run = function (keys, callback) {
   async.eachSeries(
     this.translations.getLanguages(),
     function(language, next){
-      if (!self.translations.getLangFilename(language)) {
-        return next();
-      }
       self._runLang(language, keys, next);
     },
     callback
@@ -63,7 +76,7 @@ IGen.prototype.run = function (callback) {
 
   async.series({
     keys: function(next) {
-      self.templates.parseKeys(next);
+      self.keys.run(next);
     }
   }, function(err, results) {
     if (err) return callback(err);

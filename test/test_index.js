@@ -11,22 +11,33 @@ describe('Index', function(){
     }
 
     _.defaults(options, {
-      templates: {
-        path: "./dummy/path",
-        type: "handlebars",
-        helperName: "t"
+      keys: {
+        module: 'handlebars',
+        options: {
+          path: "./dummy/path",
+          type: "handlebars",
+          helperName: "t"
+        }
       },
       translations: {
-        file: './dummy-file.csv'
+        module: 'csv',
+        options: {
+          file: './dummy-file.csv'
+        }
       },
-      generator: {}
+      generator: {
+        options: {}
+      },
+      reporter: {
+        options: {}
+      },
     });
     return new IGen(options);
   }
   describe('constructor', function(){
     function testOptions(field) {
       var options = {
-        templates: {},
+        keys: {},
         translations: {},
         generator: {}
       };
@@ -39,11 +50,11 @@ describe('Index', function(){
 
       assert(false);
     }
-    it('templates is required', function(){
-      testOptions('templates');
+    it('keys is required', function(){
+      testOptions('keys');
     });
     it('translations is required', function(){
-      testOptions('templates');
+      testOptions('translations');
     });
     it('generator is required', function(){
       testOptions('generator');
@@ -58,20 +69,20 @@ describe('Index', function(){
       beforeEach(function(){
         igen = createIGen();
         stubs = {
-          igen:      { object: igen, methodNames: [ '_run' ] },
-          templates: { object: igen.templates, methodNames: [ 'parseKeys' ] }
+          igen: { object: igen, methodNames: [ '_run' ] },
+          keys: { object: igen.keys, methodNames: [ 'run' ] }
         };
         testUtil.createStubs(stubs);
 
         stubs.igen._run.callsArgWith(1, null);
         keys = ['key-found'];
-        stubs.templates.parseKeys.callsArgWith(0, null, keys);
+        stubs.keys.run.callsArgWith(0, null, keys);
       });
       it('should not call _run', function(done){
         igen.run(function(err){
           if (err) return done(err);
           assert.equal(stubs.igen._run.callCount, 1);
-          assert.equal(stubs.templates.parseKeys.callCount, 1);
+          assert.equal(stubs.keys.run.callCount, 1);
           done();
         });
       });
@@ -104,10 +115,12 @@ describe('Index', function(){
       beforeEach(function(){
         igen = createIGen({
           translations: {
-            file: './dummy-file.csv',
-            languages: {
-              fr: { column: 0, filename: "dummy-name-fr" },
-              en: { column: 1, filename: "dummy-name-" }
+            options: {
+              file: './dummy-file.csv',
+              languages: {
+                fr: { column: 0, filename: "dummy-name-fr" },
+                en: { column: 1, filename: "dummy-name-" }
+              }
             }
           }
         });
@@ -134,31 +147,33 @@ describe('Index', function(){
     beforeEach(function(){
       igen = createIGen({
         translations: {
-          file: './dummy-file.csv',
-          languages: {
-            fr: { column: 0, filename: "dummy-name-fr" }
+          options: {
+            file: './dummy-file.csv',
+            languages: {
+              fr: { column: 0, filename: "dummy-name-fr" }
+            }
           }
         }
       });
       stubs = {
         translations: { object: igen.translations, methodNames: [ 'extractLang' ] },
-        generator:    { object: igen.generator,    methodNames: [ 'run' ] },
+        igen:         { object: igen,    methodNames: [ '_processLangResults' ] },
       };
       testUtil.createStubs(stubs);
 
       translations = { key_trans: 'value_trans' };
       stubs.translations.extractLang.callsArgWith(1, null, translations);
-      stubs.generator.run.callsArgWith(3, null);
+      stubs.igen._processLangResults.callsArgWith(3, null);
     });
     afterEach(function(){
       testUtil.restoreStubs(stubs);
     });
-    it('call translations.extractLang, templates.parseKeys, generator.run' +
+    it('call translations.extractLang, keys.parseKeys, generator.run' +
       'with the right parameters', function(done){
       igen._runLang('fr', [], function(err){
         if (err) return done(err);
         assert(stubs.translations.extractLang.calledWith('fr'), 'should call extractLang with fr');
-        assert(stubs.generator.run.calledWith('dummy-name-fr', [], translations), 'should call generator.run with righs params');
+        assert(stubs.igen._processLangResults.calledWith('dummy-name-fr', [], translations), 'should call generator.run with righs params');
         done();
       });
     });
