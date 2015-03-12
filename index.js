@@ -22,7 +22,7 @@ function IGen (options) {
 
 IGen.prototype._runLang = function (language, callback) {
   var self = this;
-  async.parallel({
+  async.series({
     translations: function(next) {
       self.translations.extractLang(language, next);
     },
@@ -39,7 +39,7 @@ IGen.prototype._runLang = function (language, callback) {
 
     var keys = results.keys;
     var translations = results.translations;
-
+    console.log('self.generator.run');
     self.generator.run(filename, keys, translations, callback);
   });
 };
@@ -57,7 +57,7 @@ IGen.prototype.run = function (langName, callback) {
     callback = langName;
   }
 
-  async.each(
+  async.eachSeries(
     languages,
     function(language, next){
       if (!self.translations.getLangFilename(language)) {
