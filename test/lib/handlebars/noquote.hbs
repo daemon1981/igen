@@ -1,8 +1,9 @@
-{{#if links}}
-	<ul>
-		<h2 class="search-title truncate">{{t titleKey}}</h2>
-		{{#each links}}
-			<li class="truncate"><a href="{{{url}}}">{{{wording}}}</a></li>
-		{{/each}}
-	</ul>
-{{/if}}
+{{t "standard_format"}}
+{{ t "with_space_before_helper"}}
+{{t 'single_quote'}}
+{{view "shared/header"}}
+{{t keyVariable}}
+<div>{{t "in_html"}}</div>
+{{{shouldBeSkipped}}}
+{{#each links}}{{t "in_each"}}{{/each}}
+{{t "with_data" dummy_data=dummyValue}}

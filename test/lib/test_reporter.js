@@ -136,15 +136,15 @@ describe('Reporter', function(){
       assert.deepEqual(result, expecpedResult);
     });
   });
-  describe('isRightFormat', function(){
-    function testIsRightFormat(value, expecpedResult) {
-      var model = new Reporter();
-      var result = model.isRightFormat(value);
-      assert.deepEqual(result, expecpedResult);
-    }
-    it('missing curly braces');
-    // it('missing curly braces', function(){
-    //   testIsRightFormat('dummy phrase {missingCurlyBraces}}', false);
-    // });
-  });
+  // describe('isRightFormat', function(){
+  //   function testIsRightFormat(value, expecpedResult) {
+  //     var model = new Reporter();
+  //     var result = model.isRightFormat(value);
+  //     assert.deepEqual(result, expecpedResult);
+  //   }
+  //   it('missing curly braces');
+  //   // it('missing curly braces', function(){
+  //   //   testIsRightFormat('dummy phrase {missingCurlyBraces}}', false);
+  //   // });
+  // });
 });

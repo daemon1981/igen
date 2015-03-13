@@ -3,13 +3,13 @@ var assert   = require('assert');
 var Keys = require('../../lib/keys');
 
 describe('Keys', function(){
+  function createKeys() {
+    return new Keys({
+      path: './dummy/path',
+      helperName: 't'
+    });
+  }
   describe('getParser', function(){
-    function createKeys() {
-      return new Keys({
-        path: './dummy/path',
-        helperName: 't'
-      });
-    }
     it('return crawler', function(){
       var keys = createKeys();
       assert(keys);
@@ -23,15 +23,40 @@ describe('Keys', function(){
       });
 
       var expectedKeys = [
-        'print',
-        'expense_report_date_label',
-        'titleKey'
+        "recursive_key",
+        "standard_format",
+        "with_space_before_helper",
+        "single_quote",
+        "in_html",
+        "in_each"
       ];
       keys.run(function(err, result){
         if (err) return done(err);
         assert.deepEqual(result, expectedKeys);
         done();
       });
+    });
+  });
+  describe('trimKey', function(){
+    function testTrimKey(param, expectedResult) {
+      var keys = createKeys();
+      var result = keys.trimKey(param);
+      assert.equal(result, expectedResult);
+    }
+    it('case {{t "standard_forma"}}', function(){
+      testTrimKey('{{t "standard_forma"}}', 'standard_forma');
+    });
+    it('case {{ t "with_space_before_helper"}}', function(){
+      testTrimKey('{{ t "with_space_before_helper"}}', 'with_space_before_helper');
+    });
+    it('case {{t \'single_quote\'}}', function(){
+      testTrimKey('{{t \'single_quote\'}}', 'single_quote');
+    });
+    it('case {{t keyVariable}}', function(){
+      testTrimKey('{{t keyVariable}}', null);
+    });
+    it('case {{t "with_data" dummy_data=dummyValue}}', function(){
+      testTrimKey('{{t "with_data" dummy_data=dummyValue}}', 'with_data');
     });
   });
 });

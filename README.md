@@ -55,7 +55,9 @@ var iGen = new IGen({
   reporter: {
     module: 'json',
     options: {
-      file: "./locales/reporting"   // location of the generated files (String)
+      file: "./locales/reporting", // location of the generated files (String)
+      notSpecifiedSymbol: '!!'     // string used to inform the translation has not been specified
+                                   // (String, default null)
     }
   }
 });
