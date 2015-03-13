@@ -35,16 +35,51 @@ describe('Reporter', function(){
       model.getMissing(keys, translationsKeys);
       assert.deepEqual(keys, ['dummy_key_1', 'dummy_key_2']);
     });
+    it('case with variable key', function(){
+      var model = new Reporter();
+      var keys = [
+        'dummy_key_1',
+        'dummy_*_key',
+        'dummy_key_2'
+      ];
+      var translationsKeys = [
+        'dummy_key_1',
+        'dummy_variable_key'
+      ];
+      var expecpedMissing = ['dummy_key_2'];
+
+      var missing = model.getMissing(keys, translationsKeys);
+      assert.deepEqual(missing, expecpedMissing);
+    });
   });
   describe('getUsed', function(){
     it('return not used translationsKeys keys', function(){
       var model = new Reporter();
       var keys = ['dummy_key_1'];
       var translationsKeys = ['dummy_key_1', 'dummy_key_2' ];
-      var expecpedNotUsed = ['dummy_key_1'];
+      var expecpedUsed = ['dummy_key_1'];
 
       var missing = model.getUsed(keys, translationsKeys);
-      assert.deepEqual(missing, expecpedNotUsed);
+      assert.deepEqual(missing, expecpedUsed);
+    });
+    it('case with variable key', function(){
+      var model = new Reporter();
+      var keys = [
+        'dummy_key_1',
+        'dummy_*_key'
+      ];
+      var translationsKeys = [
+        'dummy_key_1',
+        'dummy_variable_key',
+        'dummy_key_2'
+      ];
+      var expecpedUsed = [
+        'dummy_key_1',
+        'dummy_variable_key'
+      ];
+
+      var missing = model.getUsed(keys, translationsKeys);
+      assert.deepEqual(missing, expecpedUsed);
     });
   });
   describe('getNotUsed', function(){
@@ -53,6 +88,24 @@ describe('Reporter', function(){
       var keys = ['dummy_key_1'];
       var translationsKeys = ['dummy_key_1', 'dummy_key_2' ];
       var expecpedNotUsed = ['dummy_key_2'];
+
+      var missing = model.getNotUsed(keys, translationsKeys);
+      assert.deepEqual(missing, expecpedNotUsed);
+    });
+    it('case with variable key', function(){
+      var model = new Reporter();
+      var keys = [
+        'dummy_key_1',
+        'dummy_*_key'
+      ];
+      var translationsKeys = [
+        'dummy_key_1',
+        'dummy_variable_key',
+        'dummy_key_2'
+      ];
+      var expecpedNotUsed = [
+        'dummy_key_2'
+      ];
 
       var missing = model.getNotUsed(keys, translationsKeys);
       assert.deepEqual(missing, expecpedNotUsed);
