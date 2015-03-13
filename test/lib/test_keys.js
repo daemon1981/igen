@@ -28,7 +28,8 @@ describe('Keys', function(){
         "with_space_before_helper",
         "single_quote",
         "in_html",
-        "in_each"
+        "in_each",
+        "with_data"
       ];
       keys.run(function(err, result){
         if (err) return done(err);
